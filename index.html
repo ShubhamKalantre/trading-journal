@@ -141,9 +141,7 @@
       tbody.innerHTML='';
       trades.forEach((t,i)=>{
         const tr=document.createElement('tr');
-        tr.innerHTML=`<td>${t.date}</td><td>${t.market}</td><td>${t.direction}</td>
-          <td>${t.entry}</td><td>${t.exit}</td><td>${t.result}</td><td>${t.tags||''}</td>
-          <td>${t.screenshot?`<img src="${t.screenshot}" class="thumb">`:'-'}</td>`;
+        tr.innerHTML=`<td>${t.date}</td><td>${t.market}</td><td>${t.direction}</td><td>${t.entry}</td><td>${t.exit}</td><td>${t.result}</td><td>${t.tags||''}</td><td>${t.screenshot?`<img src="${t.screenshot}" class="thumb">`:'-'}</td><td><button class="delBtn" data-i="${i}">🗑️</button></td>`;
         tbody.appendChild(tr);
       });
       updateKPIs(); renderChart();
@@ -169,7 +167,7 @@
         entry:entry.value, exit:exit.value, result:result.value, tags:tags.value,
         screenshot:imgData
       };
-      trades.push(t); save(); render(); e.target.reset();
+      trades.push(t); save(); render(); attachDeleteHandlers(); alert('Trade added successfully!'); e.target.reset();
     });
 
     document.getElementById('filter').addEventListener('input', e=>{
@@ -198,7 +196,9 @@
 
     // chart
     let chart;
-    function renderChart(){
+    function attachDeleteHandlers(){document.querySelectorAll('.delBtn').forEach(btn=>{btn.onclick=()=>{if(confirm('Delete this trade?')){const i=btn.dataset.i; trades.splice(i,1); save(); render(); attachDeleteHandlers();}}});}
+
+function renderChart(){
       const pls = trades.map(t=>Number(t.result||0));
       let sum=0; const eq=[]; pls.forEach(p=>{sum+=p; eq.push(sum)});
       const ctx=document.getElementById('equityChart').getContext('2d');
