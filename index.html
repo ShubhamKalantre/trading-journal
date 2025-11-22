@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Trading Journal</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f8f9fa; }
+    h1 { text-align: center; }
+    .container { max-width: 900px; margin: auto; }
+    form { background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    input, textarea { width: 100%; padding: 10px; margin: 8px 0; border-radius: 8px; border: 1px solid #ccc; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #fff; }
+    th, td { padding: 10px; border: 1px solid #ddd; text-align: left; }
+    th { background: #eee; }
+    .btn { background: #007bff; color: white; padding: 10px 20px; border: none; cursor: pointer; border-radius: 6px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>My Trading Journal</h1>
+
+    <form id="tradeForm">
+      <input type="date" id="date" required />
+      <input type="text" id="market" placeholder="Market (e.g., EURUSD)" required />
+      <input type="text" id="direction" placeholder="Direction (Buy/Sell)" required />
+      <input type="number" step="0.00001" id="entry" placeholder="Entry Price" required />
+      <input type="number" step="0.00001" id="sl" placeholder="Stop Loss" required />
+      <input type="number" step="0.00001" id="tp" placeholder="Take Profit" required />
+      <textarea id="notes" placeholder="Notes"></textarea>
+      <input type="url" id="screenshot" placeholder="Screenshot URL (from Google Drive)" />
+      <button type="submit" class="btn">Add Trade</button>
+    </form>
+
+    <table id="tradeTable">
+      <thead>
+        <tr>
+          <th>Date</th><th>Market</th><th>Direction</th><th>Entry</th><th>SL</th><th>TP</th><th>Notes</th><th>Screenshot</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+<script>
+  const form = document.getElementById('tradeForm');
+  const tableBody = document.querySelector('#tradeTable tbody');
+
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+
+    let row = `<tr>
+      <td>${date.value}</td>
+      <td>${market.value}</td>
+      <td>${direction.value}</td>
+      <td>${entry.value}</td>
+      <td>${sl.value}</td>
+      <td>${tp.value}</td>
+      <td>${notes.value}</td>
+      <td><a href="${screenshot.value}" target="_blank">View</a></td>
+    </tr>`;
+
+    tableBody.innerHTML += row;
+    form.reset();
+  });
+</script>
+
+</body>
+</html>
