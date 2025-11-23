@@ -3,35 +3,61 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Trading Journal — Lite</title>
+  <title>Pro Trading Journal</title>
   <style>
-    :root{--bg:#f3f6f9;--card:#ffffff;--muted:#6b7280;--accent:#2563eb}
+    :root{--bg:#f3f6f9;--card:#ffffff;--muted:#6b7280;--accent:#2563eb;--green:#10b981;--red:#ef4444}
     *{box-sizing:border-box}
-    body{margin:0;font-family:Inter,Arial;background:var(--bg);color:#111}
+    body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:#111}
+    
+    /* Layout */
     .app{display:flex;min-height:100vh}
+    .sidebar{width:220px;background:#111827;color:#fff;padding:18px;display:flex;flex-direction:column;gap:18px;flex-shrink:0}
+    .main{flex:1;padding:24px;overflow-x:hidden}
+    
+    /* Sidebar & Nav */
+    .nav a{display:block;color:#9ca3af;padding:10px;text-decoration:none;border-radius:6px;cursor:pointer;transition:0.2s}
+    .nav a:hover, .nav a.active{background:#1f2937;color:#fff}
+    .tools{margin-top:auto;border-top:1px solid #374151;padding-top:15px}
+    .tool-btn{width:100%;background:#374151;color:#fff;border:none;padding:8px;margin-bottom:8px;border-radius:6px;cursor:pointer;font-size:12px}
+    .tool-btn:hover{background:#4b5563}
 
-    /* sidebar */
-    .sidebar{width:220px;background:#111827;color:#fff;padding:18px;display:flex;flex-direction:column;gap:18px}
-    .nav a{display:block;color:#ddd;padding:10px;text-decoration:none;border-radius:6px}
-    .nav a:hover{background:#1f2937}
-
-    /* main */
-    .main{flex:1;padding:24px}
-    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:20px}
-    .card{background:#fff;padding:16px;border-radius:12px;box-shadow:0 6px 18px rgba(0,0,0,0.08)}
+    /* Cards & Grid */
+    .grid{display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:16px;margin-top:20px}
+    .card{background:#fff;padding:16px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,0.03)}
     .kpi{font-size:28px;font-weight:700}
     .sub{color:var(--muted);font-size:13px}
 
-    /* form */
-    .journal{margin-top:22px;background:#fff;padding:14px;border-radius:12px}
-    form .row{display:flex;gap:12px;margin-bottom:10px}
-    input,select{padding:10px;border-radius:8px;border:1px solid #e6e9ef}
-    table{width:100%;border-collapse:collapse;margin-top:14px}
-    th,td{padding:10px;border-top:1px solid #eef2f7}
-
-    .thumb{max-width:100px;border-radius:8px}
-
-    .btn{background:var(--accent);color:#fff;padding:10px 12px;border:none;border-radius:8px;cursor:pointer}
+    /* Form */
+    .journal{margin-top:22px;background:#fff;padding:20px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,0.03)}
+    form .row{display:flex;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+    .input-group{flex:1;min-width:140px}
+    input,select{width:100%;padding:10px;border-radius:8px;border:1px solid #e6e9ef;outline:none}
+    input:focus,select:focus{border-color:var(--accent)}
+    
+    /* Buttons */
+    .btn{background:var(--accent);color:#fff;padding:10px 24px;border:none;border-radius:8px;cursor:pointer;font-weight:600}
+    .btn.update{background:#f59e0b} /* Orange for update */
+    
+    /* Table */
+    .table-container{overflow-x:auto;margin-top:20px}
+    table{width:100%;border-collapse:collapse;min-width:800px}
+    th{text-align:left;color:var(--muted);font-size:12px;text-transform:uppercase;padding:12px}
+    td{padding:12px;border-top:1px solid #eef2f7;vertical-align:middle}
+    
+    /* Dynamic Colors */
+    .win{color:var(--green);font-weight:600}
+    .loss{color:var(--red);font-weight:600}
+    
+    /* Thumbnails & Modal */
+    .thumb{width:60px;height:40px;object-fit:cover;border-radius:4px;cursor:zoom-in;border:1px solid #eee}
+    .action-btn{background:none;border:none;cursor:pointer;font-size:16px;padding:4px}
+    
+    /* Image Modal */
+    #imgModal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);justify-content:center;align-items:center;z-index:1000}
+    #imgModal img{max-width:90%;max-height:90%;border-radius:8px;box-shadow:0 0 20px rgba(0,0,0,0.5)}
+    
+    /* Utilities */
+    .hidden{display:none}
   </style>
 </head>
 <body>
@@ -41,8 +67,14 @@
       <h2>Trading Journal</h2>
       <div class="nav">
         <a class="active">Dashboard</a>
-        <a>Journal</a>
-        <a>Reports</a>
+      </div>
+      
+      <div class="tools">
+        <div class="sub" style="margin-bottom:5px">Data Management</div>
+        <button class="tool-btn" onclick="exportData()">⬇ Export JSON</button>
+        <button class="tool-btn" onclick="document.getElementById('importFile').click()">⬆ Import JSON</button>
+        <input type="file" id="importFile" class="hidden" accept=".json" onchange="importData(this)">
+        <button class="tool-btn" style="background:#7f1d1d" onclick="clearAll()">⚠ Clear All</button>
       </div>
     </aside>
 
@@ -59,125 +91,189 @@
           <div class="kpi" id="winRate">0%</div>
         </div>
         <div class="card">
-          <div class="sub">Total P/L</div>
-          <div class="kpi" id="totalPL">0</div>
+          <div class="sub">Net P/L</div>
+          <div class="kpi" id="totalPL">0.00</div>
         </div>
       </section>
 
       <section class="journal">
-        <h2>Add Trade</h2>
+        <h2 id="formTitle">Add New Trade</h2>
 
         <form id="tradeForm">
-          <div class="row">
-            <input type="date" id="date" required />
-            <input type="text" id="market" placeholder="Market" required />
-            <select id="direction" required>
-              <option value="">Direction</option>
-              <option>Buy</option>
-              <option>Sell</option>
-            </select>
+          <input type="hidden" id="editIndex" value="-1"> <div class="row">
+            <div class="input-group"><input type="date" id="date" required /></div>
+            <div class="input-group"><input type="text" id="market" placeholder="Market (e.g. EURUSD)" required /></div>
+            <div class="input-group">
+              <select id="direction" required onchange="calcAutoPL()">
+                <option value="">Direction</option>
+                <option value="Buy">Buy (Long)</option>
+                <option value="Sell">Sell (Short)</option>
+              </select>
+            </div>
           </div>
 
           <div class="row">
-            <input type="number" step="0.01" id="entry" placeholder="Entry" required />
-            <input type="number" step="0.01" id="exit" placeholder="Exit" required />
-            <input type="number" step="0.01" id="result" placeholder="P/L" />
+            <div class="input-group"><input type="number" step="any" id="qty" placeholder="Quantity/Lot Size" required oninput="calcAutoPL()" /></div>
+            <div class="input-group"><input type="number" step="any" id="entry" placeholder="Entry Price" required oninput="calcAutoPL()" /></div>
+            <div class="input-group"><input type="number" step="any" id="exit" placeholder="Exit Price" required oninput="calcAutoPL()" /></div>
+            <div class="input-group"><input type="number" step="any" id="result" placeholder="P/L (Auto calc)" readonly style="background:#f9fafb;font-weight:bold"/></div>
           </div>
 
           <div class="row">
-            <input type="file" id="screenshot" accept="image/*">
-            <input type="text" id="tags" placeholder="Tags" />
-            <button class="btn" type="submit">Add</button>
+            <div class="input-group" style="flex:2"><input type="file" id="screenshot" accept="image/*"></div>
+            <div class="input-group" style="flex:2"><input type="text" id="tags" placeholder="Tags (e.g. #trend #breakout)" /></div>
+            <button class="btn" id="submitBtn" type="submit">Add Trade</button>
+            <button class="btn" type="button" id="cancelBtn" onclick="resetForm()" style="background:#9ca3af;display:none;margin-left:10px">Cancel</button>
           </div>
         </form>
 
-        <input id="filter" placeholder="Filter by market..." style="padding:8px;border-radius:8px;border:1px solid #ccc;margin-top:10px;width:250px">
+        <div style="margin-top:30px;display:flex;justify-content:space-between;align-items:center">
+          <h3>Recent Trades</h3>
+          <input id="filter" placeholder="Search market or tags..." style="padding:8px;border-radius:8px;border:1px solid #ccc;width:250px">
+        </div>
 
-        <table id="tradeTable">
-          <thead>
-            <tr>
-              <th>Date</th><th>Market</th><th>Dir</th><th>Entry</th>
-              <th>Exit</th><th>P/L</th><th>Tags</th><th>Shot</th><th>Del</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-
+        <div class="table-container">
+          <table id="tradeTable">
+            <thead>
+              <tr>
+                <th>Date</th><th>Market</th><th>Dir</th><th>Qty</th><th>Entry</th>
+                <th>Exit</th><th>P/L</th><th>Tags</th><th>Chart</th><th>Actions</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
       </section>
 
       <section class="card" style="margin-top:20px">
-        <h2>Equity Chart</h2>
+        <h2>Equity Curve</h2>
         <canvas id="equityChart" height="80"></canvas>
       </section>
 
     </main>
   </div>
 
+  <div id="imgModal" onclick="this.style.display='none'">
+    <img id="modalImage" src="" />
+  </div>
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
-let trades = JSON.parse(localStorage.getItem("trades-lite") || "[]");
+// --- State Management ---
+let trades = JSON.parse(localStorage.getItem("trades-pro") || "[]");
 const tbody = document.querySelector("#tradeTable tbody");
+const form = document.getElementById("tradeForm");
+const submitBtn = document.getElementById("submitBtn");
+const cancelBtn = document.getElementById("cancelBtn");
+const editIndexInput = document.getElementById("editIndex");
 
-function save(){ localStorage.setItem("trades-lite", JSON.stringify(trades)); }
+// --- Core Functions ---
 
-function readFileAsDataURL(file){
-  return new Promise(res=>{
-    let r=new FileReader();
-    r.onload=()=>res(r.result);
-    r.readAsDataURL(file);
-  });
+function save(){ 
+  localStorage.setItem("trades-pro", JSON.stringify(trades));
+  render();
 }
 
-function render(){
-  tbody.innerHTML="";
-  trades.forEach((t,i)=>{
-    let tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${t.date}</td>
-      <td>${t.market}</td>
-      <td>${t.direction}</td>
-      <td>${t.entry}</td>
-      <td>${t.exit}</td>
-      <td>${t.result}</td>
-      <td>${t.tags||""}</td>
-      <td>${t.screenshot ? `<img class="thumb" src="${t.screenshot}">` : "-"}</td>
-      <td><button class="delBtn" data-i="${i}">🗑️</button></td>
-    `;
-    tbody.appendChild(tr);
-  });
-
-  attachDeleteHandlers();
-  updateKPIs();
-  renderChart();
-}
-
-function attachDeleteHandlers(){
-  document.querySelectorAll(".delBtn").forEach(btn=>{
-    btn.onclick = ()=>{
-      if(confirm("Delete this trade?")){
-        trades.splice(btn.dataset.i,1);
-        save();
-        render();
+// Compress Image (Crucial for LocalStorage)
+function compressImage(file) {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target.result;
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_WIDTH = 600; // Resize to max 600px width
+        const scaleSize = MAX_WIDTH / img.width;
+        canvas.width = MAX_WIDTH;
+        canvas.height = img.height * scaleSize;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        // Return Base64 at 0.7 quality
+        resolve(canvas.toDataURL('image/jpeg', 0.7)); 
       }
     }
   });
 }
 
+// Auto Calculate P/L
+function calcAutoPL() {
+  const dir = document.getElementById("direction").value;
+  const q = parseFloat(document.getElementById("qty").value);
+  const en = parseFloat(document.getElementById("entry").value);
+  const ex = parseFloat(document.getElementById("exit").value);
+  const resField = document.getElementById("result");
+
+  if(dir && q && en && ex) {
+    let val = 0;
+    if(dir === "Buy") val = (ex - en) * q;
+    if(dir === "Sell") val = (en - ex) * q;
+    resField.value = val.toFixed(2);
+    // Visual feedback
+    resField.style.color = val >= 0 ? "var(--green)" : "var(--red)";
+  }
+}
+
+// --- Rendering ---
+
+function render(){
+  tbody.innerHTML="";
+  
+  // Sort by date descending (Newest first)
+  const sortedTrades = trades.map((t, i) => ({...t, originalIndex: i}))
+                             .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+  sortedTrades.forEach((t)=>{
+    let tr = document.createElement("tr");
+    const isWin = parseFloat(t.result) >= 0;
+    
+    tr.innerHTML = `
+      <td>${t.date}</td>
+      <td><strong>${t.market}</strong></td>
+      <td><span style="color:${t.direction==='Buy'?'var(--green)':'var(--red)'}">${t.direction}</span></td>
+      <td>${t.qty}</td>
+      <td>${t.entry}</td>
+      <td>${t.exit}</td>
+      <td class="${isWin ? 'win' : 'loss'}">${parseFloat(t.result).toFixed(2)}</td>
+      <td style="font-size:12px;color:#666">${t.tags||""}</td>
+      <td>${t.screenshot ? `<img class="thumb" src="${t.screenshot}" onclick="openModal('${t.screenshot}')">` : "<span style='color:#ccc'>-</span>"}</td>
+      <td>
+        <button class="action-btn" onclick="editTrade(${t.originalIndex})" title="Edit">✎</button>
+        <button class="action-btn" onclick="deleteTrade(${t.originalIndex})" title="Delete" style="color:red">🗑</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  updateKPIs();
+  renderChart();
+}
+
+function openModal(src){
+  document.getElementById("modalImage").src = src;
+  document.getElementById("imgModal").style.display = "flex";
+}
+
 function updateKPIs(){
   document.getElementById("totalTrades").innerText = trades.length;
-  const wins = trades.filter(t=>Number(t.result)>0).length;
-  const totalPL = trades.reduce((s,t)=>s+Number(t.result||0),0);
+  const wins = trades.filter(t=>parseFloat(t.result)>0).length;
+  const totalPL = trades.reduce((s,t)=>s+parseFloat(t.result||0),0);
 
-  document.getElementById("winRate").innerText =
+  document.getElementById("winRate").innerText = 
     trades.length ? ((wins/trades.length*100).toFixed(1)+"%") : "0%";
 
-  document.getElementById("totalPL").innerText = totalPL.toFixed(2);
+  const plEl = document.getElementById("totalPL");
+  plEl.innerText = totalPL.toFixed(2);
+  plEl.style.color = totalPL >= 0 ? "var(--green)" : "var(--red)";
 }
 
 let chart;
 function renderChart(){
-  const pls = trades.map(t=>Number(t.result||0));
+  // Chart needs chronological order (Oldest -> Newest)
+  const chronological = [...trades].sort((a, b) => new Date(a.date) - new Date(b.date));
+  const pls = chronological.map(t=>parseFloat(t.result||0));
   let sum=0, eq=[];
   pls.forEach(p=>{ sum+=p; eq.push(sum); });
 
@@ -187,44 +283,155 @@ function renderChart(){
   chart = new Chart(ctx,{
     type:"line",
     data:{
-      labels:eq.map((_,i)=>i+1),
-      datasets:[{label:"Equity",data:eq,borderColor:"#2563eb"}]
+      labels: chronological.map(t => t.date),
+      datasets:[{
+        label:"Equity",
+        data:eq,
+        borderColor:"#2563eb",
+        backgroundColor: "rgba(37, 99, 235, 0.1)",
+        fill: true,
+        tension: 0.3
+      }]
     },
-    options:{plugins:{legend:{display:false}}}
+    options:{
+      plugins:{legend:{display:false}},
+      scales: { x: { display: false } }
+    }
   });
 }
 
-document.getElementById("tradeForm").addEventListener("submit", async e=>{
+// --- CRUD Logic ---
+
+form.addEventListener("submit", async e=>{
   e.preventDefault();
 
-  let file = screenshot.files[0];
-  let imgData = file ? await readFileAsDataURL(file) : null;
+  // Handle Image
+  let imgData = null;
+  const fileInput = document.getElementById("screenshot");
+  
+  // If editing, keep old image unless new one is provided
+  const isEditing = editIndexInput.value !== "-1";
+  if(isEditing && !fileInput.files[0]){
+     imgData = trades[editIndexInput.value].screenshot;
+  } else if (fileInput.files[0]) {
+     imgData = await compressImage(fileInput.files[0]);
+  }
 
   let t = {
-    date:date.value,
-    market:market.value,
-    direction:direction.value,
-    entry:entry.value,
-    exit:exit.value,
-    result:result.value,
-    tags:tags.value,
-    screenshot:imgData
+    date: document.getElementById("date").value,
+    market: document.getElementById("market").value,
+    direction: document.getElementById("direction").value,
+    qty: document.getElementById("qty").value,
+    entry: document.getElementById("entry").value,
+    exit: document.getElementById("exit").value,
+    result: document.getElementById("result").value,
+    tags: document.getElementById("tags").value,
+    screenshot: imgData
   };
 
-  trades.push(t);
+  if(isEditing){
+    trades[editIndexInput.value] = t;
+    alert("Trade Updated!");
+  } else {
+    trades.push(t);
+    alert("Trade Added!");
+  }
+  
   save();
-  render();
-  alert("Trade added!");
-  e.target.reset();
+  resetForm();
 });
 
+function editTrade(index){
+  const t = trades[index];
+  document.getElementById("date").value = t.date;
+  document.getElementById("market").value = t.market;
+  document.getElementById("direction").value = t.direction;
+  document.getElementById("qty").value = t.qty;
+  document.getElementById("entry").value = t.entry;
+  document.getElementById("exit").value = t.exit;
+  document.getElementById("result").value = t.result;
+  document.getElementById("tags").value = t.tags;
+  
+  // UI Changes for Edit Mode
+  editIndexInput.value = index;
+  submitBtn.innerText = "Update Trade";
+  submitBtn.classList.add("update");
+  cancelBtn.style.display = "inline-block";
+  document.getElementById("formTitle").innerText = "Edit Trade";
+  
+  // Scroll to form
+  document.querySelector(".journal").scrollIntoView({behavior: "smooth"});
+}
+
+function deleteTrade(index){
+  if(confirm("Are you sure you want to delete this trade?")){
+    trades.splice(index,1);
+    save();
+  }
+}
+
+function resetForm(){
+  form.reset();
+  editIndexInput.value = "-1";
+  submitBtn.innerText = "Add Trade";
+  submitBtn.classList.remove("update");
+  cancelBtn.style.display = "none";
+  document.getElementById("formTitle").innerText = "Add New Trade";
+}
+
+function clearAll(){
+  if(confirm("WARNING: This will delete ALL your data. Have you exported a backup?")){
+    trades = [];
+    save();
+  }
+}
+
+// --- Data Import/Export ---
+
+function exportData(){
+  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(trades));
+  const downloadAnchorNode = document.createElement('a');
+  downloadAnchorNode.setAttribute("href",     dataStr);
+  downloadAnchorNode.setAttribute("download", "trading_journal_backup.json");
+  document.body.appendChild(downloadAnchorNode); // required for firefox
+  downloadAnchorNode.click();
+  downloadAnchorNode.remove();
+}
+
+function importData(input){
+  const file = input.files[0];
+  if(!file) return;
+  
+  const reader = new FileReader();
+  reader.onload = function(e){
+    try {
+      const json = JSON.parse(e.target.result);
+      if(Array.isArray(json)){
+        if(confirm("This will overwrite your current data. Continue?")){
+          trades = json;
+          save();
+          alert("Data imported successfully!");
+        }
+      } else {
+        alert("Invalid file format.");
+      }
+    } catch(err) {
+      alert("Error reading file.");
+    }
+  };
+  reader.readAsText(file);
+}
+
+// --- Search Filter ---
 document.getElementById("filter").addEventListener("input", e=>{
   const q=e.target.value.toLowerCase();
   tbody.querySelectorAll("tr").forEach(tr=>{
-    tr.style.display = tr.children[1].innerText.toLowerCase().includes(q) ? "" : "none";
+    const text = tr.innerText.toLowerCase();
+    tr.style.display = text.includes(q) ? "" : "none";
   });
 });
 
+// Init
 window.onload = ()=>{ render(); };
 </script>
 
