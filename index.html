@@ -5,72 +5,51 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Trading Journal — Lite</title>
   <style>
-    :root{--bg:#f3f6f9;--card:#ffffff;--muted:#6b7280;--accent:#2563eb;--glass:rgba(255,255,255,0.6)}
+    :root{--bg:#f3f6f9;--card:#ffffff;--muted:#6b7280;--accent:#2563eb}
     *{box-sizing:border-box}
-    body{margin:0;font-family:Inter,system-ui,Arial;background:var(--bg);color:#111}
+    body{margin:0;font-family:Inter,Arial;background:var(--bg);color:#111}
     .app{display:flex;min-height:100vh}
+
     /* sidebar */
-    .sidebar{width:220px;background:linear-gradient(180deg,#0f1724,#111827);color:#fff;padding:18px;display:flex;flex-direction:column;gap:18px}
-    .brand{font-weight:700;font-size:18px}
-    .nav a{display:block;color:rgba(255,255,255,0.85);padding:10px;border-radius:8px;text-decoration:none}
-    .nav a.active, .nav a:hover{background:rgba(255,255,255,0.06)}
+    .sidebar{width:220px;background:#111827;color:#fff;padding:18px;display:flex;flex-direction:column;gap:18px}
+    .nav a{display:block;color:#ddd;padding:10px;text-decoration:none;border-radius:6px}
+    .nav a:hover{background:#1f2937}
+
     /* main */
     .main{flex:1;padding:24px}
-    .top{display:flex;justify-content:space-between;align-items:center;gap:16px}
-    .search{padding:10px 14px;border-radius:10px;border:1px solid #e5e7eb;width:320px}
     .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:20px}
-    .card{background:var(--card);border-radius:12px;padding:16px;box-shadow:0 6px 18px rgba(16,24,40,0.06);transition:transform .18s ease,box-shadow .18s ease}
-    .card:hover{transform:translateY(-6px);box-shadow:0 18px 36px rgba(16,24,40,0.08)}
+    .card{background:#fff;padding:16px;border-radius:12px;box-shadow:0 6px 18px rgba(0,0,0,0.08)}
     .kpi{font-size:28px;font-weight:700}
     .sub{color:var(--muted);font-size:13px}
-    /* journal */
-    .journal{margin-top:22px;background:var(--card);padding:14px;border-radius:12px}
-    form .row{display:flex;gap:12px}
-    input,select,textarea{padding:10px;border-radius:8px;border:1px solid #e6e9ef}
-    table{width:100%;border-collapse:collapse;margin-top:12px}
-    th,td{padding:10px;text-align:left;border-top:1px solid #eef2f7}
-    .thumb{max-width:120px;border-radius:8px}
-    /* responsive */
-    @media(max-width:900px){.grid{grid-template-columns:repeat(1,1fr)}.sidebar{display:none}.main{padding:12px}}
-    /* small animations */
-    .fade-in{animation:fade 0.6s ease both}
-    @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
-    /* mobile-friendly buttons */
-    .btn{background:var(--accent);color:#fff;padding:10px 12px;border-radius:8px;border:none;cursor:pointer}
-    .controls{display:flex;gap:10px;align-items:center}
-    /* banner preview using uploaded design image */
-    .preview{border-radius:12px;overflow:hidden}
-    .banner{width:100%;height:150px;object-fit:cover;display:block}
+
+    /* form */
+    .journal{margin-top:22px;background:#fff;padding:14px;border-radius:12px}
+    form .row{display:flex;gap:12px;margin-bottom:10px}
+    input,select{padding:10px;border-radius:8px;border:1px solid #e6e9ef}
+    table{width:100%;border-collapse:collapse;margin-top:14px}
+    th,td{padding:10px;border-top:1px solid #eef2f7}
+
+    .thumb{max-width:100px;border-radius:8px}
+
+    .btn{background:var(--accent);color:#fff;padding:10px 12px;border:none;border-radius:8px;cursor:pointer}
   </style>
 </head>
 <body>
+
   <div class="app">
-    <aside class="sidebar fade-in">
-      <div class="brand">Trading Journal Lite</div>
+    <aside class="sidebar">
+      <h2>Trading Journal</h2>
       <div class="nav">
-        <a href="#dashboard" class="active">Dashboard</a>
-        <a href="#journal">Journal</a>
-        <a href="#reports">Reports</a>
-        <a href="#settings">Settings</a>
+        <a class="active">Dashboard</a>
+        <a>Journal</a>
+        <a>Reports</a>
       </div>
-      <div class="sub">Preview</div>
-      <!-- developer-supplied design preview image -->
-      <div class="preview"><img src="/mnt/data/tj.JPG" alt="design preview" class="banner"></div>
     </aside>
 
     <main class="main">
-      <div class="top">
-        <div>
-          <h1 style="margin:0">Dashboard</h1>
-          <div class="sub">Live summary of your trading performance</div>
-        </div>
-        <div class="controls">
-          <input class="search" placeholder="Search market or tag...">
-          <button id="exportBtn" class="btn">Export CSV</button>
-        </div>
-      </div>
+      <h1>Dashboard</h1>
 
-      <section class="grid fade-in" aria-hidden>
+      <section class="grid">
         <div class="card">
           <div class="sub">Total Trades</div>
           <div class="kpi" id="totalTrades">0</div>
@@ -85,186 +64,168 @@
         </div>
       </section>
 
-      <section class="journal fade-in">
-        <h2 style="margin-top:0">Add Trade</h2>
+      <section class="journal">
+        <h2>Add Trade</h2>
+
         <form id="tradeForm">
           <div class="row">
             <input type="date" id="date" required />
-            <input type="text" id="market" placeholder="Market (e.g., AAPL)" required />
+            <input type="text" id="market" placeholder="Market" required />
             <select id="direction" required>
               <option value="">Direction</option>
               <option>Buy</option>
               <option>Sell</option>
             </select>
           </div>
+
           <div class="row">
             <input type="number" step="0.01" id="entry" placeholder="Entry" required />
             <input type="number" step="0.01" id="exit" placeholder="Exit" required />
             <input type="number" step="0.01" id="result" placeholder="P/L" />
           </div>
+
           <div class="row">
             <input type="file" id="screenshot" accept="image/*">
-            <input type="text" id="tags" placeholder="Tags (comma)" />
+            <input type="text" id="tags" placeholder="Tags" />
             <button class="btn" type="submit">Add</button>
           </div>
         </form>
 
-        <div style="margin-top:18px">
-          <input id="filter" placeholder="Filter by market..." style="padding:8px;border-radius:8px;border:1px solid #e6e9ef;width:260px">
-        </div>
+        <input id="filter" placeholder="Filter by market..." style="padding:8px;border-radius:8px;border:1px solid #ccc;margin-top:10px;width:250px">
 
         <table id="tradeTable">
           <thead>
-            <tr><th>Date</th><th>Market</th><th>Dir</th><th>Entry</th><th>Exit</th><th>P/L</th><th>Tags</th><th>Shot</th></tr>
+            <tr>
+              <th>Date</th><th>Market</th><th>Dir</th><th>Entry</th>
+              <th>Exit</th><th>P/L</th><th>Tags</th><th>Shot</th><th>Del</th>
+            </tr>
           </thead>
           <tbody></tbody>
         </table>
+
       </section>
 
-      <section id="reports" class="card fade-in" style="margin-top:18px">
-        <h2 style="margin-top:0">Reports</h2>
+      <section class="card" style="margin-top:20px">
+        <h2>Equity Chart</h2>
         <canvas id="equityChart" height="80"></canvas>
       </section>
 
     </main>
   </div>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <script>
-  // simple localStorage-backed journal with image preview using FileReader
-  const trades = JSON.parse(localStorage.getItem('trades-lite')||'[]');
-  const tbody = document.querySelector('#tradeTable tbody');
+let trades = JSON.parse(localStorage.getItem("trades-lite") || "[]");
+const tbody = document.querySelector("#tradeTable tbody");
 
-  function save(){ localStorage.setItem('trades-lite', JSON.stringify(trades)); }
+function save(){ localStorage.setItem("trades-lite", JSON.stringify(trades)); }
 
-  function showToast(msg){
-    const t = document.getElementById('toast');
-    if(!t) return;
-    t.textContent = msg;
-    t.classList.add('show');
-    setTimeout(()=>t.classList.remove('show'),1800);
-  }
+function readFileAsDataURL(file){
+  return new Promise(res=>{
+    let r=new FileReader();
+    r.onload=()=>res(r.result);
+    r.readAsDataURL(file);
+  });
+}
 
-  function render(){
-    tbody.innerHTML='';
-    trades.forEach((t,i)=>{
-      const tr=document.createElement('tr');
-      tr.innerHTML = `
-        <td>${t.date}</td>
-        <td>${t.market}</td>
-        <td>${t.direction}</td>
-        <td>${t.entry}</td>
-        <td>${t.exit}</td>
-        <td>${t.result}</td>
-        <td>${t.tags||''}</td>
-        <td>${t.screenshot?`<img src="${t.screenshot}" class="thumb">`:'-'}</td>
-        <td><button class="delBtn" data-i="${i}">🗑️</button></td>
-      `;
-      tbody.appendChild(tr);
-    });
-    attachDeleteHandlers();
-    updateKPIs();
-    renderChart();
-  }
+function render(){
+  tbody.innerHTML="";
+  trades.forEach((t,i)=>{
+    let tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${t.date}</td>
+      <td>${t.market}</td>
+      <td>${t.direction}</td>
+      <td>${t.entry}</td>
+      <td>${t.exit}</td>
+      <td>${t.result}</td>
+      <td>${t.tags||""}</td>
+      <td>${t.screenshot ? `<img class="thumb" src="${t.screenshot}">` : "-"}</td>
+      <td><button class="delBtn" data-i="${i}">🗑️</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
 
-  function updateKPIs(){
-    document.getElementById('totalTrades').innerText=trades.length;
-    const wins=trades.filter(t=>Number(t.result)>0).length;
-    const total=trades.reduce((s,t)=>s+Number(t.result||0),0);
-    document.getElementById('winRate').innerText=trades.length?((wins/trades.length*100).toFixed(1)+'%'):'0%';
-    document.getElementById('totalPL').innerText=total.toFixed(2);
-  }
+  attachDeleteHandlers();
+  updateKPIs();
+  renderChart();
+}
 
-  document.getElementById('tradeForm').addEventListener('submit', async e=>{
-    e.preventDefault();
-    const fileInput=document.getElementById('screenshot');
-    let imgData=null;
-    if(fileInput.files && fileInput.files[0]){
-      imgData = await readFileAsDataURL(fileInput.files[0]);
+function attachDeleteHandlers(){
+  document.querySelectorAll(".delBtn").forEach(btn=>{
+    btn.onclick = ()=>{
+      if(confirm("Delete this trade?")){
+        trades.splice(btn.dataset.i,1);
+        save();
+        render();
+      }
     }
-    // READ VALUES DIRECTLY FROM DOM (reliable)
-    const t = {
-      date: document.getElementById('date').value,
-      market: document.getElementById('market').value,
-      direction: document.getElementById('direction').value,
-      entry: document.getElementById('entry').value,
-      exit: document.getElementById('exit').value,
-      result: document.getElementById('result').value,
-      tags: document.getElementById('tags').value,
-      screenshot: imgData
-    };
-    trades.push(t);
-    save();
-    render();
-    // popup confirmation when a trade is added
-    alert('Trade added successfully!');
-    e.target.reset();
   });
+}
 
-  document.getElementById('filter').addEventListener('input', e=>{
-    const q=e.target.value.toLowerCase();
-    tbody.querySelectorAll('tr').forEach(tr=>{
-      tr.style.display = (tr.children[1].innerText.toLowerCase().includes(q)) ? '' : 'none';
-    });
+function updateKPIs(){
+  document.getElementById("totalTrades").innerText = trades.length;
+  const wins = trades.filter(t=>Number(t.result)>0).length;
+  const totalPL = trades.reduce((s,t)=>s+Number(t.result||0),0);
+
+  document.getElementById("winRate").innerText =
+    trades.length ? ((wins/trades.length*100).toFixed(1)+"%") : "0%";
+
+  document.getElementById("totalPL").innerText = totalPL.toFixed(2);
+}
+
+let chart;
+function renderChart(){
+  const pls = trades.map(t=>Number(t.result||0));
+  let sum=0, eq=[];
+  pls.forEach(p=>{ sum+=p; eq.push(sum); });
+
+  const ctx = document.getElementById("equityChart").getContext("2d");
+  if(chart) chart.destroy();
+
+  chart = new Chart(ctx,{
+    type:"line",
+    data:{
+      labels:eq.map((_,i)=>i+1),
+      datasets:[{label:"Equity",data:eq,borderColor:"#2563eb"}]
+    },
+    options:{plugins:{legend:{display:false}}}
   });
+}
 
-  document.getElementById('globalSearch').addEventListener('input', e=>{
-    const q=e.target.value.toLowerCase();
-    tbody.querySelectorAll('tr').forEach(tr=>{
-      tr.style.display = (tr.innerText.toLowerCase().includes(q)) ? '' : 'none';
-    });
-  });
+document.getElementById("tradeForm").addEventListener("submit", async e=>{
+  e.preventDefault();
 
-  function readFileAsDataURL(file){
-    return new Promise(res=>{
-      const r=new FileReader();
-      r.onload=()=>res(r.result);
-      r.readAsDataURL(file);
-    });
-  }
+  let file = screenshot.files[0];
+  let imgData = file ? await readFileAsDataURL(file) : null;
 
-  // export CSV
-  document.getElementById('exportBtn').addEventListener('click', ()=>{
-    const rows=[['Date','Market','Direction','Entry','Exit','P/L','Tags']];
-    trades.forEach(t=>rows.push([t.date,t.market,t.direction,t.entry,t.exit,t.result,(t.tags||'')]));
-    const csv = rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\\n');
-    const blob=new Blob([csv],{type:'text/csv'});
-    const url=URL.createObjectURL(blob);
-    const a=document.createElement('a'); a.href=url; a.download='trades.csv'; a.click(); URL.revokeObjectURL(url);
-  });
+  let t = {
+    date:date.value,
+    market:market.value,
+    direction:direction.value,
+    entry:entry.value,
+    exit:exit.value,
+    result:result.value,
+    tags:tags.value,
+    screenshot:imgData
+  };
 
-  // Delete handlers (confirm popup shown) & chart
-  function attachDeleteHandlers(){
-    document.querySelectorAll('.delBtn').forEach(btn=>{
-      btn.onclick = ()=>{
-        const i = parseInt(btn.dataset.i, 10);
-        if (confirm('Delete this trade?')) {
-          trades.splice(i,1);
-          save();
-          render();
-          showToast('Trade deleted');
-        }
-      };
-    });
-  }
-
-  let chart;
-  function renderChart(){
-    const pls = trades.map(t=>Number(t.result||0));
-    let sum=0; const eq=[];
-    pls.forEach(p=>{ sum+=p; eq.push(sum); });
-    const canvas = document.getElementById('equityChart');
-    if(!canvas) return;
-    const ctx=canvas.getContext('2d');
-    if(chart) chart.destroy();
-    chart = new Chart(ctx, {
-      type:'line',
-      data:{ labels:eq.map((_,i)=>i+1), datasets:[{ label:'Equity', data:eq, fill:false, borderColor:'#2563eb'}] },
-      options:{ responsive:true, plugins:{ legend:{ display:false } } }
-    });
-  }
-
-  // initial render
+  trades.push(t);
+  save();
   render();
+  alert("Trade added!");
+  e.target.reset();
+});
+
+document.getElementById("filter").addEventListener("input", e=>{
+  const q=e.target.value.toLowerCase();
+  tbody.querySelectorAll("tr").forEach(tr=>{
+    tr.style.display = tr.children[1].innerText.toLowerCase().includes(q) ? "" : "none";
+  });
+});
+
+window.onload = ()=>{ render(); };
 </script>
 
 </body>
